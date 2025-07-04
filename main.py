@@ -4,13 +4,12 @@ from dotenv import load_dotenv
 from google import genai
 from google.genai import types
 
-load_dotenv()
+_ = load_dotenv()
 api_key = os.environ.get("GEMINI_API_KEY")
 client = genai.Client(api_key=api_key)
 
 
 def main():
-
     if len(sys.argv) < 2:
         print("Usage: uv run main.py <prompt> [--verbose]")
         sys.exit(1)
@@ -27,8 +26,9 @@ def main():
 
     if len(sys.argv) > 2 and sys.argv[2] == "--verbose":
         print(f"User prompt: {sys.argv[1]}")
-        print(f"Prompt tokens: {response.usage_metadata.prompt_token_count}")
-        print(f"Response tokens: {response.usage_metadata.candidates_token_count}")
+        if usage := response.usage_metadata:
+            print(f"Prompt tokens: {usage.prompt_token_count}")
+            print(f"Response tokens: {usage.candidates_token_count}")
 
 
 if __name__ == "__main__":
