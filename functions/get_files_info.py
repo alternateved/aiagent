@@ -1,12 +1,11 @@
 import os
+from functions.utils import issubdir
 
 
 def get_files_info(working_directory: str, directory: str | None = None) -> str:
     full_path = os.path.join(working_directory, directory or ".")
-    working_directory_abspath = os.path.abspath(working_directory)
-    full_path_abspath = os.path.abspath(full_path)
 
-    if not full_path_abspath.startswith(working_directory_abspath):
+    if not issubdir(full_path, working_directory):
         return f'Error: Cannot list "{directory}" as it is outside the permitted working directory'
 
     try:

@@ -1,12 +1,11 @@
 import os
+from functions.utils import issubdir
 
 
 def get_file_content(working_directory: str, file_path: str) -> str:
     full_path = os.path.join(working_directory, file_path)
-    working_directory_abspath = os.path.abspath(working_directory)
-    full_path_abspath = os.path.abspath(full_path)
 
-    if not full_path_abspath.startswith(working_directory_abspath):
+    if not issubdir(full_path, working_directory):
         return f'Error: Cannot read "{file_path}" as it is outside the permitted working directory'
 
     try:
