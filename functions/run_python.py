@@ -1,9 +1,10 @@
 import os
 import subprocess
+from google.genai import types
 from functions.utils import issubdir
 
 
-def run_python_file(working_directory, file_path):
+def run_python_file(working_directory: str, file_path: str) -> str:
     full_path = os.path.join(working_directory, file_path)
 
     if not issubdir(full_path, working_directory):
@@ -34,3 +35,18 @@ def run_python_file(working_directory, file_path):
 
     except Exception as e:
         return f"Error: executing Python file: {e}"
+
+
+schema_run_python_file = types.FunctionDeclaration(
+    name="run_python_file",
+    description="Executes file with Python interpreter, constrained to the working directory. It returns standard output, standard error and return code.",
+    parameters=types.Schema(
+        type=types.Type.OBJECT,
+        properties={
+            "file_path": types.Schema(
+                type=types.Type.STRING,
+                description="The file to execute, relative to the working directory.",
+            ),
+        },
+    ),
+)

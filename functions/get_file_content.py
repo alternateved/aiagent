@@ -1,4 +1,5 @@
 import os
+from google.genai import types
 from functions.utils import issubdir
 
 
@@ -24,3 +25,18 @@ def get_file_content(working_directory: str, file_path: str) -> str:
 
     except Exception as e:
         return f"Error: {e}"
+
+
+schema_get_file_content = types.FunctionDeclaration(
+    name="get_file_content",
+    description="Gets maximum of 10000 characters from file, constrained to the working directory.",
+    parameters=types.Schema(
+        type=types.Type.OBJECT,
+        properties={
+            "file_path": types.Schema(
+                type=types.Type.STRING,
+                description="The file to get characters from, relative to the working directory.",
+            ),
+        },
+    ),
+)
