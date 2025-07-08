@@ -1,3 +1,4 @@
+from functions.run_python import run_python_file
 from functions.write_file import write_file
 from functions.get_files_info import get_files_info
 from functions.get_file_content import get_file_content
@@ -27,5 +28,12 @@ tuples = [
 for tuple in tuples:
     result = write_file("calculator", tuple[0], tuple[1])
     print(f"Result for {tuple[0]} file:")
+    print(result)
+    print("\n")
+
+print("Tests for run_python")
+python_files = ["main.py", "tests.py", "../main.py", "nonexistent.py"]
+for file in python_files:
+    result = run_python_file("calculator", file)
     print(result)
     print("\n")
