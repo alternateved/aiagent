@@ -7,7 +7,9 @@ from functions.write_file import write_file
 
 
 def call_function(
-    function_call_part: types.FunctionCall, verbose: bool = False
+    working_directory: str,
+    function_call_part: types.FunctionCall,
+    verbose: bool = False,
 ) -> types.Content | None:
     if verbose:
         print(f"Calling function: {function_call_part.name}({function_call_part.args})")
@@ -36,7 +38,7 @@ def call_function(
             )
 
         kwargs = function_call_part.args.copy() if function_call_part.args else {}
-        kwargs["working_directory"] = "./calculator"
+        kwargs["working_directory"] = working_directory
         function_result = functions[function_call_part.name](**kwargs)
 
         return types.Content(

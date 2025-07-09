@@ -15,11 +15,12 @@ client = genai.Client(api_key=api_key)
 
 
 def main():
-    if len(sys.argv) < 2:
-        print("Usage: uv run main.py <prompt> [--verbose]")
+    if len(sys.argv) < 3:
+        print("Usage: uv run main.py <working_directory> <prompt> [--verbose]")
         sys.exit(1)
 
-    verbose = len(sys.argv) > 2 and sys.argv[2] == "--verbose"
+    working_directory = sys.argv[1]
+    verbose = len(sys.argv) > 3 and sys.argv[2] == "--verbose"
     system_prompt = """
 You are a helpful AI coding agent.
 
@@ -33,7 +34,7 @@ When a user asks a question or makes a request, make a function call plan. You c
 All paths you provide should be relative to the working directory. You do not need to specify the working directory in your function calls as it is automatically injected for security reasons.
 """
     messages = [
-        types.Content(role="user", parts=[types.Part(text=sys.argv[1])]),
+        types.Content(role="user", parts=[types.Part(text=sys.argv[2])]),
     ]
     available_functions = types.Tool(
         function_declarations=[
@@ -65,7 +66,7 @@ All paths you provide should be relative to the working directory. You do not ne
 
             if response.function_calls:
                 for function_call in response.function_calls:
-                    result = call_function(function_call, verbose)
+                    result = call_function(working_directory, function_call, verbose)
 
                     if (
                         result is not None
