@@ -43,34 +43,56 @@ All paths you provide should be relative to the working directory. You do not ne
             schema_write_file,
         ]
     )
-    response = client.models.generate_content(
-        model="gemini-2.0-flash-001",
-        contents=messages,
-        config=types.GenerateContentConfig(
-            tools=[available_functions], system_instruction=system_prompt
-        ),
-    )
 
-    if response.function_calls:
-        for function_call in response.function_calls:
-            result = call_function(function_call, verbose)
+    for _ in range(0, 20):
+        try:
+            response = client.models.generate_content(
+                model="gemini-2.0-flash-001",
+                contents=messages,
+                config=types.GenerateContentConfig(
+                    tools=[available_functions], system_instruction=system_prompt
+                ),
+            )
 
-            if (
-                result is not None
-                and result.parts
-                and result.parts[0].function_response is not None
-                and result.parts[0].function_response.response is not None
-            ):
-                if verbose:
-                    print(f"-> {result.parts[0].function_response.response}")
-            else:
-                raise Exception("invalid response")
+            if not response.function_calls and response.text:
+                print(response.text)
+                break
 
-    if verbose:
-        print(f"User prompt: {sys.argv[1]}")
-        if usage := response.usage_metadata:
-            print(f"Prompt tokens: {usage.prompt_token_count}")
-            print(f"Response tokens: {usage.candidates_token_count}")
+            if response.candidates:
+                for candidate in response.candidates:
+                    if content := candidate.content:
+                        messages.append(content)
+
+            if response.function_calls:
+                for function_call in response.function_calls:
+                    result = call_function(function_call, verbose)
+
+                    if (
+                        result is not None
+                        and result.parts
+                        and result.parts[0].function_response is not None
+                        and result.parts[0].function_response.name is not None
+                        and result.parts[0].function_response.response is not None
+                    ):
+                        content = types.Content(
+                            role="tool",
+                            parts=[
+                                types.Part.from_function_response(
+                                    name=result.parts[0].function_response.name,
+                                    response=result.parts[0].function_response.response,
+                                )
+                            ],
+                        )
+
+                        messages.append(content)
+
+                        if verbose:
+                            print(f"-> {result.parts[0].function_response.response}")
+                    else:
+                        raise Exception("invalid response")
+
+        except Exception as e:
+            print(f"unexpected error: {e}")
 
 
 if __name__ == "__main__":
