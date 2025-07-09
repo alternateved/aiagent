@@ -14,38 +14,37 @@ def call_function(
     else:
         print(f" - Calling function: {function_call_part.name}")
 
-    if function_call_part.args:
-        functions = {
-            "get_files_info": get_files_info,
-            "get_file_content": get_file_content,
-            "run_python_file": run_python_file,
-            "write_file": write_file,
-        }
+    functions = {
+        "get_files_info": get_files_info,
+        "get_file_content": get_file_content,
+        "run_python_file": run_python_file,
+        "write_file": write_file,
+    }
 
-        if function_call_part.name:
-            if function_call_part.name not in functions:
-                return types.Content(
-                    role="tool",
-                    parts=[
-                        types.Part.from_function_response(
-                            name=function_call_part.name,
-                            response={
-                                "error": f"Unknown function: {function_call_part.name}"
-                            },
-                        )
-                    ],
-                )
-
-            kwargs = function_call_part.args.copy()
-            kwargs["working_directory"] = "./calculator"
-            function_result = functions[function_call_part.name](**kwargs)
-
+    if function_call_part.name:
+        if function_call_part.name not in functions:
             return types.Content(
                 role="tool",
                 parts=[
                     types.Part.from_function_response(
                         name=function_call_part.name,
-                        response={"result": function_result},
+                        response={
+                            "error": f"Unknown function: {function_call_part.name}"
+                        },
                     )
                 ],
             )
+
+        kwargs = function_call_part.args.copy() if function_call_part.args else {}
+        kwargs["working_directory"] = "./calculator"
+        function_result = functions[function_call_part.name](**kwargs)
+
+        return types.Content(
+            role="tool",
+            parts=[
+                types.Part.from_function_response(
+                    name=function_call_part.name,
+                    response={"result": function_result},
+                )
+            ],
+        )
